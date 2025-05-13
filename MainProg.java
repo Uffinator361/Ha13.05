@@ -1,0 +1,429 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+
+/**
+  * Vorlage für das Arbeiten mit den My_Swing-Elementen
+  *
+  * @version 1.0 vom 22.02.2017
+  * @author Olaf Brink
+  */
+  
+@SuppressWarnings("serial")
+public class MainProg extends JFrame {
+  // Anfang Attribute
+  private MyButton anyButton;
+  private MyTextField uppercaseTF, lowercaseTF, vigKeyText;
+  private MyLabel manyLabels;
+  private MyTextArea textToWork, resultsOfAnalyse;
+  private String stringToWork, lastLoadedFile;
+  private MyFileIO file = new MyFileIO();
+  private JSpinner whichLetterSlider = new JSpinner();
+  private SpinnerNumberModel whichLetterSliderModel = new SpinnerNumberModel(1, 0, 25, 1);
+  private JSpinner offsetLetterSlider = new JSpinner();
+  private SpinnerNumberModel offsetLetterSliderModel = new SpinnerNumberModel(0, 0, 25, 1);
+  private JSpinner caesarSlider = new JSpinner();
+  private SpinnerNumberModel caesarSliderModel = new SpinnerNumberModel(3, -25, 25, 1);
+  private JSpinner kasiskiSlider = new JSpinner();
+  private SpinnerNumberModel kasiskiSliderModel = new SpinnerNumberModel(3, 3, 13, 1);
+  private JSpinner skytaleSlider = new JSpinner();
+  private SpinnerNumberModel skytaleSliderModel = new SpinnerNumberModel(2, 2, 23, 1);
+  private JSpinner matrixRowsSlider = new JSpinner();
+  private SpinnerNumberModel matrixRowsSliderModel = new SpinnerNumberModel(2, 2, 23, 1);
+  private JSpinner matrixColsSlider = new JSpinner();
+  private SpinnerNumberModel matrixColsSliderModel = new SpinnerNumberModel(2, 2, 23, 1);
+  // Ende Attribute
+  
+  public MainProg(String title) { 
+    // Frame-Initialisierung
+    super(title);
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    int frameWidth = 1600; 
+    int frameHeight = 1000;
+    setSize(frameWidth, frameHeight);
+    Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+    int x = (d.width - getSize().width) / 2;
+    int y = (d.height - getSize().height) / 2;
+    setLocation(x, y);
+    setResizable(false);
+    Container cp = getContentPane();
+    cp.setLayout(null);
+    
+    // Anfang Komponenten
+    textToWork       = new MyTextArea( 10,10,500,800,this);
+    resultsOfAnalyse = new MyTextArea(520,10,500,800,this);
+    resultsOfAnalyse.setFont(new Font("Monospaced", Font.PLAIN,18));             // etwas größere, nichtproportionale Schriftart  
+    
+    anyButton = new MyButton("Load"      ,1100,0,100,this);   // einer der beiden Konstruktoren benötigt text, xpos, row, width, FrameToAdd
+    anyButton = new MyButton("Clear"     ,1100,1,100,this);
+    anyButton = new MyButton("Kill LF"   ,1100,2,100,this);
+    anyButton = new MyButton("TakeLetter",1220,2,100,this);
+    anyButton = new MyButton("Analyse"   ,1100,3,100,this);                   
+    anyButton = new MyButton("SAnalyse"  ,1220,3,100,this);
+    anyButton = new MyButton("Set"       ,1100,5,100,this);  
+    anyButton = new MyButton("Caesar"    ,1100,9,100,this);
+    anyButton = new MyButton("VigEnc"    ,1100,11,100,this);
+    anyButton = new MyButton("VigDec"    ,1100,12,100,this);
+    anyButton = new MyButton("Kasiski"   ,1100,13,100,this);
+    anyButton = new MyButton("SkytaleEnc",1100,15,100,this);
+    anyButton = new MyButton("SkytaleDec",1320,15,100,this);
+    anyButton = new MyButton("Matrix-Enc",1100,17,100,this);
+    anyButton = new MyButton("Matrix-Dec",1420,17,100,this);
+    
+    vigKeyText = new MyTextField(1220,11,300,this);
+    
+    uppercaseTF = new MyTextField(1100,6,300,this);
+    lowercaseTF = new MyTextField(1100,7,300,this);
+    uppercaseTF.setFont(new Font("Monospaced", Font.PLAIN,18));
+    lowercaseTF.setFont(new Font("Monospaced", Font.PLAIN,18));
+    
+    whichLetterSlider.setModel(whichLetterSliderModel);
+    whichLetterSlider.setBounds(1340,8+32*2+16, 80, 24);
+    cp.add(whichLetterSlider);
+    
+    offsetLetterSlider.setModel(offsetLetterSliderModel);
+    offsetLetterSlider.setBounds(1440,8+32*2+16, 80, 24);
+    cp.add(offsetLetterSlider);
+    
+    caesarSlider.setModel(caesarSliderModel);
+    caesarSlider.setBounds(1220,8+32*9, 80, 24);
+    cp.add(caesarSlider);
+    
+    kasiskiSlider.setModel(kasiskiSliderModel);
+    kasiskiSlider.setBounds(1220,8+32*13, 80, 24);
+    cp.add(kasiskiSlider);
+    
+    skytaleSlider.setModel(skytaleSliderModel);
+    skytaleSlider.setBounds(1220,8+32*15, 80, 24);
+    cp.add(skytaleSlider);
+    
+    matrixRowsSlider.setModel(matrixRowsSliderModel);
+    matrixRowsSlider.setBounds(1220,8+32*17, 80, 24);
+    cp.add(matrixRowsSlider);
+    
+    matrixColsSlider.setModel(matrixColsSliderModel);
+    matrixColsSlider.setBounds(1320,8+32*17, 80, 24);
+    cp.add(matrixColsSlider);
+    
+    manyLabels = new MyLabel("every",1340,2,50,this);
+    manyLabels = new MyLabel("Offset",1440,2,50,this);
+    manyLabels = new MyLabel("OLD",1410,6,50,this);
+    manyLabels = new MyLabel("new",1410,7,50,this);
+    manyLabels = new MyLabel("x",1306,17,50,this);  
+    // Ende Komponenten
+    
+    setVisible(true);
+  } // end of public MainProg
+  
+  // Anfang Methoden
+  
+  public static void main(String[] args) {
+    new MainProg("MainProg");
+  } // end of main
+  
+  public void doButtonAction(String whichButton){
+    System.out.println(whichButton);
+    stringToWork = textToWork.getText();
+    if (whichButton == "Load") {
+      String newStringToWork = file.loadFile(this); 
+      if (!newStringToWork.isEmpty()) {
+        stringToWork = newStringToWork;
+        textToWork.setText(stringToWork);
+      } 
+    }
+    if (whichButton == "Clear") {
+      textToWork.setText("");
+    }
+    if (whichButton == "Kill LF") {
+      System.out.println(stringToWork.length());
+      int countOfLineFeeds = 0;
+      for (int i = 0; i < stringToWork.length();i++) {
+        if (stringToWork.charAt(i) == System.getProperty("line.separator").charAt(0) && stringToWork.charAt(i+1) == System.getProperty("line.separator").charAt(1)) {
+          stringToWork = stringToWork.substring(0,i) + " " + stringToWork.substring(i+2); 
+          countOfLineFeeds++; 
+        } 
+      }
+      textToWork.setText(stringToWork);
+      System.out.println(countOfLineFeeds);
+      file.saveRecords(stringToWork,"Geheimtext_woLF.txt");
+    }
+    if (whichButton == "TakeLetter") {
+      String newString = takeEveryXLetter(textToWork.getText(), (int) whichLetterSlider.getValue(), (int) offsetLetterSlider.getValue()); 
+      resultsOfAnalyse.setText(newString);
+    }
+    if (whichButton == "Analyse") {
+      int counter;
+      int stringLength = stringToWork.length();
+      String analyseString = "";
+      for (char c = 'A'; c <= 'Z' ; c++ ) {
+        counter = 0;
+        for (int i = 0; i < stringLength; i++) {
+          if (stringToWork.charAt(i) == c) {
+            counter++; 
+          } 
+        }
+        analyseString = analyseString + c + "   " + String.format("%4d", counter) + "   " + String.format("%2d", (counter*100/stringLength)) + " %" + "\n"; 
+      }
+      resultsOfAnalyse.setText(analyseString);
+      resultsOfAnalyse.setCaretPosition(0); 
+    }
+    if (whichButton == "SAnalyse") {
+      stringToWork = takeEveryXLetter(textToWork.getText(), (int) whichLetterSlider.getValue(), (int) offsetLetterSlider.getValue()); 
+      int counter;
+      int stringLength = stringToWork.length();
+      String analyseString = "";
+      char[] chars = new char[26];
+      int[] frequencies = new int[26];
+      for (char c = 'A'; c <= 'Z' ; c++ ) {
+        counter = 0;
+        for (int i = 0; i < stringLength; i++) {
+          if (stringToWork.charAt(i) == c) {
+            counter++; 
+          } 
+        }
+        chars[c-'A']=c;
+        frequencies[c-'A']=counter;
+      }
+      sort(chars,frequencies);
+      for (int i=0;i<26;i++) {
+        analyseString = analyseString + chars[i] + "   " + String.format("%4d", frequencies[i]) + "   " + String.format("%2d", (frequencies[i]*100/stringLength)) + " %" + "\n"; 
+      } 
+      int possibleKeyChar = chars[0] - 4;
+      if (possibleKeyChar < 65) possibleKeyChar = possibleKeyChar + 26;
+      analyseString = analyseString + "Caesar shift is maybe " + (chars[0] - 69) + " ('" + (char) (possibleKeyChar) + "')";
+      resultsOfAnalyse.setText(analyseString);
+      resultsOfAnalyse.setCaretPosition(0); 
+    }
+    if (whichButton == "Set") {
+      int charWorkLength = uppercaseTF.getText().length();
+      if (charWorkLength == 0 ||
+      charWorkLength != lowercaseTF.getText().length()) {   
+        uppercaseTF.setBackground(new Color(255,0,0));
+        lowercaseTF.setBackground(new Color(255,0,0));
+      } else {
+        uppercaseTF.setBackground(new Color(255,255,255));
+        lowercaseTF.setBackground(new Color(255,255,255));
+        
+        for (int i = 0; i < charWorkLength ; i++ ) {
+          char oldChar = uppercaseTF.getText().charAt(i);
+          char newChar = lowercaseTF.getText().charAt(i);
+          stringToWork = stringToWork.replace(oldChar,newChar);
+        } 
+        
+        textToWork.setText(stringToWork);
+      }
+    }
+    if (whichButton == "Caesar") {
+      String newString = caesar(textToWork.getText(), (int) caesarSlider.getValue()); 
+      resultsOfAnalyse.setText(newString);
+    }
+    if (whichButton == "VigEnc") {
+      String newString = encodeVigenere(textToWork.getText(), vigKeyText.getText()); 
+      resultsOfAnalyse.setText(newString);
+    }
+    if (whichButton == "VigDec") {
+      String newString = decodeVigenere(textToWork.getText(), vigKeyText.getText()); 
+      resultsOfAnalyse.setText(newString);
+    }
+    if (whichButton == "Kasiski") {
+      String newString = kasiskiTest(textToWork.getText(), (int) kasiskiSlider.getValue()); 
+      resultsOfAnalyse.setText(newString);
+    }
+    if (whichButton == "SkytaleEnc") {
+      String newString = encodeSkytale(textToWork.getText(), (int) skytaleSlider.getValue()); 
+      resultsOfAnalyse.setText(newString);
+    }
+    if (whichButton == "SkytaleDec") {
+      String newString = decodeSkytale(textToWork.getText(), (int) skytaleSlider.getValue()); 
+      resultsOfAnalyse.setText(newString);
+    }
+    if (whichButton == "Matrix-Enc") {
+      String newString = encodeMatrixChiffre(textToWork.getText(), (int) matrixRowsSlider.getValue(), (int) matrixColsSlider.getValue()); 
+      resultsOfAnalyse.setText(newString);
+    }
+    if (whichButton == "Matrix-Dec") {
+      String newString = decodeMatrixChiffre(textToWork.getText(), (int) matrixRowsSlider.getValue(), (int) matrixColsSlider.getValue());
+      resultsOfAnalyse.setText(newString);
+    }
+  }
+  
+  public String caesar(String input, int shift) {
+    String output = "";
+    int code = 0;
+    for (int i = 0; i < input.length() ; i++) {
+      code = input.charAt(i);
+      if (code > 64 && code < 91) {
+        code = code + shift;
+        if (code < 65) code = code + 26;
+        if (code > 90) code = code - 26;
+      }
+      output = output + (char) code;
+    }
+    return output;
+  }
+  
+  public String encodeVigenere(String input, String keyText) {
+    String output = "";
+    input = input.toUpperCase();
+    keyText = keyText.toUpperCase();
+    int n = 0, key, code;
+    for (int i = 0; i < input.length() ; i++) {
+      code = input.charAt(i);
+      if (code > 64 && code < 91) {
+        key = keyText.charAt(n) - 65;
+        code = code + key;
+        if (code > 90) code = code - 26;
+        n++;
+        if (n==keyText.length()) n = 0;
+      }
+      output = output + (char) code;
+    }  
+    return output;
+  }
+  
+  public String decodeVigenere(String input, String keyText) {
+    String output = "";
+    input = input.toUpperCase();
+    keyText = keyText.toUpperCase();
+    int n = 0, key, code;
+    for (int i = 0; i < input.length() ; i++) {
+      code = input.charAt(i);
+      if (code > 64 && code < 91) {
+        key = keyText.charAt(n) - 65;
+        code = code - key;
+        if (code < 65) code = code + 26;
+        n++;
+        if (n==keyText.length()) n = 0;
+      }
+      output = output + (char) code;
+    }  
+    return output;
+  }
+  
+  public String kasiskiTest(String input, int seqLength) {
+    String output = "";
+    input = input.toUpperCase();
+    String inputOnlyChars = "";
+    int code;
+    for (int i = 0; i < input.length() ; i++) {
+      code = input.charAt(i);
+      if (code > 64 && code < 91) {
+        inputOnlyChars = inputOnlyChars + (char) code;
+      }
+    }
+    String seq;
+    int pre = 1;
+    for (int i = 0; i < inputOnlyChars.length()-seqLength; i++) {
+      seq = inputOnlyChars.substring(i,i+seqLength);
+      for (int j = i + seqLength; j < inputOnlyChars.length()-seqLength; j++) {
+        if (inputOnlyChars.substring(j,j+seqLength).equals(seq)) {
+          output = output + seq + " " + String.format("%4d", j-i) + " " + String.format("%4d", ggT(j-i, pre)) + "\n";
+          pre = j - i;
+        }
+      }
+    }
+    return output;
+  }
+  
+  public String encodeSkytale(String input, int diameter) {
+    input = fillUp(input,diameter);
+    int rounds = input.length()/diameter;
+    String output = "";
+    for (int round = 0; round < rounds; round++) {
+      for (int i = 0; i < diameter; i++) {
+        output = output + input.charAt(round + i*rounds);
+      }
+    } 
+    return output;
+  }
+  
+  public String decodeSkytale(String input, int diameter) {
+    input = fillUp(input,diameter);
+    int rounds = input.length()/diameter;
+    String output = "";
+    for (int i = 0; i < diameter; i++) {
+      for (int round = 0; round < rounds; round++) {
+        output = output + input.charAt(round*diameter + i);
+      }
+    } 
+    return output;
+  }
+  
+  public String encodeMatrixChiffre(String input, int rows, int cols) {
+    input = fillUp(input,rows*cols);
+    char[][] charMatrix = new char[rows][cols];
+    String output = "";
+    int i = 0;
+    while (i < input.length()) { 
+      for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+          charMatrix[r][c] = input.charAt(i++);            // zeilenweise Hineinchreiben
+        }
+      }
+      
+      
+                                                           // spaltenweise Auslesen
+                                                         
+      
+    }  
+    return output;
+  }
+
+  public String decodeMatrixChiffre(String input, int rows, int cols) {
+    input = fillUp(input,rows*cols); 
+    return "";
+  }
+  
+  public String fillUp(String input, int multiples) {
+    String output = "";
+    int gapSize = (multiples-(input.length()%multiples))%multiples;
+    for (int i = 0;i < gapSize; i++) {
+      output = output + "*";
+    } 
+    return input+output;
+  }
+  
+  
+  public String takeEveryXLetter(String input, int x, int offset) {
+    String output = "";
+    input = input.toUpperCase();
+    String inputOnlyChars = "";
+    int code;
+    for (int i = 0; i < input.length() ; i++) {
+      code = input.charAt(i);
+      if (code > 64 && code < 91) {
+        inputOnlyChars = inputOnlyChars + (char) code;
+      }
+    }
+    for (int i = offset; i < inputOnlyChars.length(); i = i + x) {
+      output = output + inputOnlyChars.charAt(i);
+    }
+    return output;
+  }
+  
+  public int ggT(int a, int b) {
+    if (a % b == 0) return b;
+    else return ggT(b, a % b);
+  }  
+  
+  private void sort(char[] c, int[] f) {
+    char tempc;
+    int tempf;
+    for (int i=25;i>=0;i--) {
+      for (int j=0;j<i;j++) {
+        if (f[j]<f[j+1]) {
+          tempc  = c[j+1];
+          c[j+1] = c[j];
+          c[j]   = tempc;
+          tempf  = f[j+1];
+          f[j+1] = f[j];
+          f[j]   = tempf;
+        } 
+      }
+    } 
+    
+  }
+}
+      
+      
